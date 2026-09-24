@@ -1,71 +1,122 @@
-# DSH Pet (dshpet-mc)
+# DSH Pet for Minecraft（dshpet-mc）
 
-把 [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) 的桌面宠物体验移植成 **Minecraft 纯客户端 HUD 桌宠 mod**。
+一个 **Minecraft 纯客户端 mod**：**为 dsh（DeepSeek Harness）提供接入 MC 的框架**，让 dsh 能够实时「看见」并驱动 Minecraft；同时自带一只桌面宠物 HUD 作为该框架的首个可视化载体。
 
-- **平台**：Forge 1.20.1 / NeoForge 1.21.1（Stonecutter 双节点）
-- **定位**：纯客户端（`displayTest = IGNORE_SERVER_VERSION`），服务端无需安装
-- **素材获取**：**装上即用；首次需下载素材（约 64MB，一次性）**；也可**离线自备**——把 `.gif`/`.png` 放进 `config/dshpet/animations/`，或手动放置整包目录
-  - 除「按需下载素材」外**无任何网络请求**；不发送遥测、不联外网
-- **状态**：`0.1.0`（M1：单宠物 + 待机动画 + HUD 常驻显示）
+> **一句话**：dsh ↔ MC 的桥梁，宠物是它的第一个"身体"。
+
+- **平台**：Forge 1.20.1 / NeoForge 1.21.1（Stonecutter 双节点，同一套源码）
+- **定位**：**纯客户端**（`displayTest = IGNORE_SERVER_VERSION`）—— 服务端无需安装、不碰服务器、玩家无需开端口
+- **状态**：`0.1.0`（宠物 HUD 已可用；dsh 接入框架规划中，见下）
 
 ---
 
-## 许可（Licensing）—— 请先读这一节
+## 这个项目做什么
 
-本项目**代码与素材是两套许可**，切勿混为一谈：
+### ① dsh 接入框架（核心目标）
 
-| 内容 | 许可 | 说明 |
+让 dsh 侧（本机或云端）与 MC 建立**持续连接**，从而：
+
+| 能力 | 说明 | 状态 |
 |---|---|---|
-| **本项目代码** | **MIT**（见 [`LICENSE`](LICENSE)） | 可自由使用/修改/分发 |
-| **动画素材**（运行时按需下载，**本仓库不分发**） | 上游条款：**允许开源使用，禁止商用** | **不适用 MIT**！ |
-| 上游代码部分 | MIT（`Copyright (c) 2026 PC2005-cloud`） | 全文见 [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md) |
+| **看** | 游戏事件流（受伤/入夜/生物群系/宠物被点击…）+ 周期状态快照 | 规划中 |
+| **看（画面）** | 按需截图（免去人工截图/口述参数） | 规划中 |
+| **说** | 让宠物主动说话（气泡 + 聊天栏），用于陪玩/提醒 | 规划中 |
+| **动** | 切动画、显隐、移动、缩放（调试 + 事件反应） | 规划中 |
+| **调** | 远程改配置（缩放模式/整数倍/素材包） | 规划中 |
 
-### 上游署名要求（二创约定，原文摘录）
+**架构取向**（调研 [Easy LLM](https://modrinth.com/mod/easy-llm)、[BeaCraft](https://modrinth.com/mod/projectbea)、[elly-ai-agent](https://github.com/Smekkamite/elly-ai-agent)、[Voyager](https://github.com/MineDojo/Voyager) 后的结论）：
 
-> **二次创作（二创）约定**：基于本项目的衍生 / 改版 / 换皮作品，在**任何介绍、展示、分发该作品的地方**，须附上原作者 GitHub 地址：<https://github.com/PC2005-cloud/dsh-pet>
+```
+dsh 侧（大脑 + 服务端）                MC 侧（感官 + 手脚 + 客户端）
+  监听 127.0.0.1 / 可配云端地址          主动连出去（endpoint 可配）
+  GET  /stream   (SSE 事件流)  ──────►   订阅事件
+  POST /event /state           ◄──────   上报事件与状态
+  POST /say /anim /act         ──────►   说话 / 切动画 / 动作
+```
+- **MC 主动连出** ⇒ 本机与云端**同一套代码**，玩家家里**不需要端口转发**
+- **策略/记忆/LLM 全在 dsh 侧**，mod 侧只做感官与手脚（保持薄、可测、无 LLM 依赖）
+- 默认**只读**、默认**关闭**；云端场景需 token 认证（详见后续文档）
 
-⇒ **分发本 mod（jar / Release / 整合包 / 换皮版 / 视频介绍）时，必须带上上述地址。**
+### ② 桌面宠物 HUD（已可用）
 
-### 实务边界（照上游条款执行）
+框架的首个载体，也是开发期的可视化调试手段：
 
-- ✅ **可以**：开源分发、修改、做换皮版（**附署名**）
-- ❌ **不可以**：售卖、放进付费整合包、用于付费服务器售卖 —— 素材部分**禁止商用**
+- 屏幕右下角常驻，**暂停菜单之上也可见**
+- **三档缩放模式**：`native`（1 texel = 1 物理像素，最锐利）/ `pixel_perfect`（整数倍，默认 **2×**）/ `ratio`（按屏比例，尺寸自由）
+- **像素画清晰度方案**：CPU 预重采样（可分离两趟 + 预乘 alpha）+ 1:1 绘制，规避非整数倍缩放的发糊/抖动
+- **素材包按需下载**：多镜像并行 + 断点续传 + md5 校验 + 校验后落盘；单包一模型
+- **官方配置屏**（模组列表 → 配置）+ 命令族 `/dshpet ...`
+
+---
+
+## 素材与许可（重要）
+
+**代码与素材是两套许可，切勿混为一谈。**
+
+| 内容 | 许可 |
+|---|---|
+| **本项目代码** | **MIT**（见 [`LICENSE`](LICENSE)） |
+| **调试动画素材** | 来自开源项目 **[PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)**，遵循其条款：**允许开源使用、禁止商用** —— **不适用 MIT** |
+| 上游代码部分 | MIT（`Copyright (c) 2026 PC2005-cloud`），全文见 [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md) |
+
+**关于素材的两点说明**：
+
+1. **本仓库不分发任何动画素材**（jar 内受限 GIF 数为 **0**）。仓库内只含**元数据清单**（文件名/大小/md5/上游直链），素材在**运行时按需下载**。
+2. **默认素材来自 dsh-pet，它只是"调试资源"**——本框架设计上**支持任意第三方素材包**（自定义 manifest 链接 / 手动放置目录），你完全可以换成自己的宠物形象。
+
+**素材获取**：**装上即用；首次需下载素材（约 64MB，一次性）**；也可**离线自备**——把 `.gif`/`.png` 放进 `config/dshpet/animations/`，或手动放置整包目录。
+
+> 除「按需下载素材」外**无任何网络请求**；不发送遥测、不联外网。
+
+**使用上游素材时请遵守**：
+- ✅ 可以：开源项目中使用、二创、学习
+- ❌ 不可以：售卖、放进付费整合包、用于付费服务器售卖
 - 要商用须**先取得上游素材权利人授权**
-
-上述声明同时随 jar 分发（`META-INF/LICENSE` · `META-INF/LICENSE-UPSTREAM-DSHPET` · `META-INF/THIRD-PARTY-NOTICES.md`），满足 MIT「许可与版权声明须随副本分发」的要求。
+- 二创/衍生作品请**附上原作者地址**（[PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)），并按上游要求保留署名
 
 ---
 
 ## 快速开始
 
-1. 把 `dshpet-forge-<版本>+1.20.1.jar` 或 `dshpet-neoforge-<版本>+1.21.1.jar` 放进对应 `mods/`
-2. 进世界 → 右下角出现桌宠（默认动画 `dongzhangxiwang`）
-3. 自定义动画：把 `.gif` / `.png` 放进 `config/dshpet/animations/`（**同名会覆盖内置**；坏文件自动回退到内置，不会让动作消失）
-4. 调试日志：`/dshpet debug on|off|status`（写入 `config/dshpet.toml`）
-
-## 素材来源与版本固定
-
-| 项 | 值 |
-|---|---|
-| 上游 | [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) |
-| 版本 | `v0.2.11`（pinned commit `d3988fa52fccaae8249d94ba31e9e4bae073362d`） |
-| 素材路径 | 上游 `dsh-pet/assets/preview/*.gif`（上游 README 展示用 GIF，已逐字节校验一致） |
-| 规格 | 画布 72×92 · 120 帧 / 10s · 12 fps · 1-bit alpha |
-
-## 开发
-
 ```bash
-# 双节点编译（必带 --no-build-cache）
-./gradlew.bat :forge:1.20.1:compileJava :neoforge:1.21.1:compileJava --no-build-cache
+# 双节点编译
+./gradlew :forge:1.20.1:compileJava :neoforge:1.21.1:compileJava --no-build-cache
 
-# 单测（仅在 forge 节点；neoforge 节点 test 是 NO-SOURCE）
-./gradlew.bat :forge:1.20.1:test --rerun-tasks
+# 全量单测（在 forge 节点上运行）
+./gradlew :forge:1.20.1:test --rerun-tasks
 
 # 打包
-./gradlew.bat :forge:1.20.1:jar :neoforge:1.21.1:jar -x javadoc --no-build-cache
+./gradlew :forge:1.20.1:jar :neoforge:1.21.1:jar -x javadoc
 ```
 
-- 纪律与守则：[`PROJECT-RULES.md`](PROJECT-RULES.md)
-- 差错与教训：[`docs/lessons-learned.md`](docs/lessons-learned.md)
-- 设计与审计：[`docs/PLAN.md`](docs/PLAN.md) · [`docs/AUDIT-2026-09-22.md`](docs/AUDIT-2026-09-22.md) · [`docs/AUDIT-standards-2026-09-23.md`](docs/AUDIT-standards-2026-09-23.md)
-- 各包说明：`common/src/main/java/com/github/xiaozhaoz1/dshpet/{core,anim,render,config}/README.md`
+游戏内：
+
+```
+/dshpet assets default     # 下载默认素材包后宠物即出现
+/dshpet model <id>         # 切换宠物模型
+/dshpet config             # 打开配置屏
+/dshpet debug on|off       # 调试日志
+```
+
+---
+
+## 路线图
+
+| 阶段 | 内容 |
+|---|---|
+| **M1** ✅ | 单宠物 + 待机动画 + HUD 常驻 |
+| **M2** | 多实例 + 配置持久化 + 边角锚定 |
+| **M3–M5** | 交互（拖拽/点击）+ 素材目录/调参 + 用户扩展（`overrides.json`）+ 多来源素材包 |
+| **M6** | 完整配置屏（含桥接状态页） |
+| **S1a/S2a** | **dsh 接入框架**：MC 侧客户端（SSE + 事件上报 + 断线重放） ↔ dsh 插件骨架 |
+| **S3** | 接入 dsh 的 LLM：宠物对话 / 主动发言（节流 + 可静音） |
+| **S5** | 云端场景实测（token + 速率限制 + 反代/HTTPS 文档） |
+
+> 桥接协议的完整设计（事件集、回执机制、重连语义、安全边界）在开发期文档中维护；对外的 `docs/PROTOCOL.md` 将在 S1a 完成后按需发布。
+
+---
+
+## 致谢
+
+- 桌面宠物与调试动画素材来自 **[PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)**（MIT 代码 / 素材允许开源使用、禁止商用）
+- 桥接架构调研参考 [Easy LLM](https://modrinth.com/mod/easy-llm)、[BeaCraft](https://modrinth.com/mod/projectbea)、[elly-ai-agent](https://github.com/Smekkamite/elly-ai-agent)、[ai-companion-core](https://github.com/chappadodle/ai-companion-core)、[Voyager](https://github.com/MineDojo/Voyager)、[MineAgent](https://github.com/bingdongni/MineAgent)
