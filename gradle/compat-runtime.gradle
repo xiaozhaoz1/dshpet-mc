@@ -1,0 +1,63 @@
+// gradle/compat-runtime.gradle — v79.63 compat 运行期开关 (compatRuntime) — **默认关**
+//
+// 【用途】让 dev/gametest 运行期带上 Create/CBC 等兼容 mod, 使 compat 任务被注册,
+//         从而 compat 冒烟与装配链「写入→运行→产出」测试**真的执行** (而非"未注册→跳过→succeed"假绿)。
+//         默认关 ⇒ 零副作用, 基线 91/91 不变。
+//
+// 【用法】
+//   ./gradlew -PcompatRuntime=true :forge:1.20.1:runGameTestServer
+//   ./gradlew -PcompatRuntime=true :neoforge:1.21.1:runGameTestServer
+//
+// 【为什么必须走 libs-maven 坐标, 而不是 files(...) 或 run/mods】三条路实测结论:
+//   1) runtimeOnly files(<mod jar>)  → JarJar 当嵌入 source ("...passed in as source for JarJar"),
+//      且**不会被 ForgeGradle 重映射** ⇒ 第三方 mod 的 mixin refmap 是 SRG 名, dev 跑 Mojang 名 →
+//      "Mixin apply failed create.mixins.json:CustomItemUseEffectsMixin @Shadow m_21211_ was not located"
+//      (Create 实测崩; CBC 同理 m_20192_) ⇒ 启动即 FATAL。
+//   2) modRuntimeOnly / dependencies.add(cfg, files(...)) → "Cannot convert the provided notation to an
+//      object of type DependencyConstraint: file collection" (mod 配置不收 file collection)。
+//   3) run/mods 目录复制 → dev 不扫描该目录 (日志零 mod 踪迹)。
+//   ⇒ 正解 = 与 TLM 同款: 把 jar 装进本地 maven repo **libs-maven/**, 用**坐标**声明 ⇒ ForgeGradle 重映射 ✓。
+//     安装见 _audit/installCompatMaven.js (group=lma.local.compat)。
+//
+// 【节点侧】build.gradle 末尾顶层: `apply from: rootProject.file('gradle/compat-runtime.gradle')`
+
+def compatRuntime = providers.gradleProperty('compatRuntime').getOrElse('false').toBoolean()
+if (!compatRuntime) {
+    return   // 默认关: 零副作用
+}
+
+// 配置名探测: forge(ForgeGradle) 有 modRuntimeOnly; neoforge(ModDevGradle) 无 → runtimeOnly
+boolean hasModRt = configurations.findByName('modRuntimeOnly') != null
+
+if (hasModRt) {
+    dependencies {
+        // 1.20.1 (forge)
+        modRuntimeOnly 'lma.local.compat:create-1.20.1:6.0.8'
+        modRuntimeOnly 'lma.local.compat:ponder-forge-1.20.1:1.0.91'
+        modRuntimeOnly 'lma.local.compat:flywheel-forge-1.20.1:1.0.5'
+        modRuntimeOnly 'lma.local.compat:createbigcannons-1.20.1:5.11.4'
+        modRuntimeOnly 'lma.local.compat:ritchiesprojectilelib-1.20.1:2.1.1'
+    }
+} else {
+    dependencies {
+        // 1.21.1 (neoforge)
+        runtimeOnly 'lma.local.compat:create-1.21.1:6.0.10'
+        runtimeOnly 'lma.local.compat:ponder-neoforge-1.21.1:1.0.82'
+        runtimeOnly 'lma.local.compat:flywheel-neoforge-1.21.1:1.21.1'
+        runtimeOnly 'lma.local.compat:createbigcannons-1.21.1:5.11.7'
+        runtimeOnly 'lma.local.compat:ritchiesprojectilelib-1.21.1:2.1.2'
+    }
+}
+
+
+// ⚠ neoforge 侧已知阻塞 (2026-09-11 实测, 与 neoforge/build.gradle:41 既有注释一致):
+//   Create 6.0.10 (1.21.1) 的 mods.toml 要求 neoforge **≥21.1.219**, 而本仓库 dev 环境是 21.1.62
+//   → 预加载阶段 FATAL: "Mod create requires neoforge 21.1.219 or above" (且 Gradle **仍报 BUILD SUCCESSFUL**, 见错题 #285)
+//   → 本地 Gradle 缓存只有 21.1.62 (无 21.1.247), 离线**无法**升级 dev 版本 ⇒ neoforge 开态验证不可行;
+//   需有网环境把 dev neoforge 升到 ≥21.1.219 (建议对齐实机 21.1.247) 后再验。
+if (!hasModRt) {
+    logger.warn('[LMA/compat] ⚠ neoforge 节点: Create 6.0.10 要求 neoforge ≥21.1.219, 本 dev 为 21.1.62 ' +
+            '⇒ 预加载会 FATAL (且 Gradle 可能仍报 SUCCESSFUL — 务必看日志是否有 GAME TESTS COMPLETE)')
+}
+logger.lifecycle('[LMA/compat] compatRuntime=true → 兼容 mod 经 {} 以 libs-maven 坐标加入运行期',
+        hasModRt ? 'modRuntimeOnly' : 'runtimeOnly')

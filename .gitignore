@@ -1,0 +1,36 @@
+# ── 构建产物 ────────────────────────────────────────────────
+build/
+**/build/
+.gradle/
+*.class
+
+# ── 运行目录（含下载的素材/截图/日志 —— 绝不入库）────────────
+**/run/
+versions/*/run/
+**/logs/
+versions/*/logs/
+*.log
+*.log.gz
+build-logs/
+libs/
+
+# ── 发行产物：jar 不入库（按用户裁定）──────────────────────
+*.jar
+
+# ── 内部计划文档：本仓库不发布 ─────────────────────────────
+docs/
+PROJECT-RULES.md
+
+# ── 受限素材：上游动画「禁止商用」，一律不入库 ──────────────
+#   运行时按需下载（见 README「素材获取」）；jar 内受限 GIF 必须为 0
+*.gif
+**/assets/dshpet/assets/*
+!**/assets/dshpet/assets/.gitkeep
+**/assets/dshpet/animations/*.gif
+
+# ── IDE / 系统 ─────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+Thumbs.db
+.DS_Store

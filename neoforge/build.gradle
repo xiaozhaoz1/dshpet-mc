@@ -1,0 +1,42 @@
+// neoforge 节点 (MC 1.21.1) —— 平台专属代码仅 3 个入口 (HUD 钩子 / 输入 / 屏幕尺寸)
+plugins {
+    id 'com.iamkaf.multiloader.neoforge'
+}
+
+def minecraftVersion = project.name
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ["-Xlint:-removal"]
+    options.encoding = "UTF-8"
+}
+
+// ModDevGradle userdev: FML 将 classes/java/main 作为 mod 目录候选, 必须含 META-INF/neoforge.mods.toml
+// 否则 "is not a valid mod file" 崩溃。multiloader 覆盖了 processResources 输出目录 ⇒ 单独 Copy 灌入。
+tasks.named('processResources') {
+    filteringCharset = 'UTF-8'
+}
+tasks.register('copyResourcesToClasses', Copy) {
+    from(layout.buildDirectory.dir('resources/main'))
+    into(layout.buildDirectory.dir('classes/java/main'))
+    dependsOn('processResources')
+}
+tasks.named('runClient') {
+    dependsOn('copyResourcesToClasses')
+}
+// classes 含灌入资源 ⇒ jar 与 resources/main 来源重复 (pack.mcmeta 等)
+tasks.named('jar') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+neoForge {
+    runs {
+        client {
+            type = "client"
+            gameDirectory = project.file('run/client')
+        }
+    }
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = "UTF-8"
+}

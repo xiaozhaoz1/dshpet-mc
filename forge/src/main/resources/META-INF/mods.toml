@@ -1,0 +1,32 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+# 许可说明（勿简化为 "MIT"）：代码 MIT；内嵌动画素材来自上游，允许开源使用但【禁止商用】
+# 详见 jar 内 META-INF/THIRD-PARTY-NOTICES.md 与 META-INF/LICENSE-UPSTREAM-DSHPET
+license = "MIT (code only); bundled animation assets: open-source use, NON-COMMERCIAL (see META-INF/THIRD-PARTY-NOTICES.md)"
+
+[[mods]]
+modId = "dshpet"
+version = "0.1.0"
+displayName = "DSH Pet"
+description = '''DSH 桌面宠物 —— Minecraft 客户端 HUD 桌宠。
+动画素材来自上游 PC2005-cloud/dsh-pet（v0.2.11，https://github.com/PC2005-cloud/dsh-pet）：
+允许开源使用、禁止商用；二创作品须署名原作者。待机/点击/拖拽/甩抛/多开/屏幕漫游，
+动画素材可由用户自行放入目录扩展。'''
+authors = "xiaozhaoz1"
+credits = "Animation assets: PC2005-cloud/dsh-pet v0.2.11 (https://github.com/PC2005-cloud/dsh-pet)"
+# 纯客户端 mod: 服务端未装也应允许进入 (不参与服务端 mod 校验)
+displayTest = "IGNORE_SERVER_VERSION"
+
+[[dependencies.dshpet]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.dshpet]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1, 1.21)"
+ordering = "NONE"
+side = "CLIENT"

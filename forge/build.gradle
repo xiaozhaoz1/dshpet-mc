@@ -1,0 +1,47 @@
+// forge 节点 (MC 1.20.1) —— 平台专属代码仅 3 个入口 (HUD 钩子 / 输入 / 屏幕尺寸)
+plugins {
+    id 'com.iamkaf.multiloader.forge'
+    id 'java-library'
+}
+
+def minecraftVersion = project.name
+
+// 抑制 JDK 21 对 MC 已过时 API 的 removal 警告 (视为错误)
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ["-Xlint:-removal"]
+    options.encoding = "UTF-8"
+}
+
+// multiloader 插件 filesMatching 用 Windows 默认编码(GBK)读 UTF-8 会写坏 mods.toml —— 显式 UTF-8 (错题 #247)
+tasks.named('processResources') {
+    filteringCharset = 'UTF-8'
+}
+
+// 测试源复用 common (单测只在 forge 节点跑; neoforge 节点 test 是 NO-SOURCE)
+sourceSets.test.java.srcDirs = [rootProject.file('common/src/test/java')]
+sourceSets.test.compileClasspath += sourceSets.main.compileClasspath
+sourceSets.test.runtimeClasspath += sourceSets.main.runtimeClasspath
+test {
+    useJUnitPlatform()
+    // 把仓库根路径显式传给测试 JVM —— 供 VersionConsistencyTest 定位 gradle.properties
+    // （避免"找不到文件就静默跳过"的恒绿陷阱；见 docs/lessons-learned.md #D6/#D11）
+    systemProperty 'dshpet.repoRoot', rootProject.projectDir.absolutePath
+}
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// 客户端运行 (legacyForge runs DSL) —— M1 实机验收用
+legacyForge {
+    runs {
+        client {
+            type = "client"
+            gameDirectory = project.file('run/client')
+        }
+    }
+}
+
+tasks.withType(Javadoc).configureEach {
+    options.encoding = "UTF-8"
+}
