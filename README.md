@@ -127,3 +127,15 @@
 
 - 默认调试宠物（昵称「大肥鱼」）的动画素材来自 **[PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)**（MIT 代码 / 素材允许开源使用、禁止商用）
 - 接入架构调研参考 [Easy LLM](https://modrinth.com/mod/easy-llm)、[BeaCraft](https://modrinth.com/mod/projectbea)、[elly-ai-agent](https://github.com/Smekkamite/elly-ai-agent)、[ai-companion-core](https://github.com/chappadodle/ai-companion-core)、[Voyager](https://github.com/MineDojo/Voyager)、[MineAgent](https://github.com/bingdongni/MineAgent)
+
+## DSH 接入插件（dsh-mc-bridge）
+
+让 DSH 里的 AI 能**看见**并**驱动**本 mod 的桥。独立仓库（随 dsh 演进，与本 mod 发版节奏不同）：
+
+**https://github.com/xiaozhaoz1/dsh-mc-bridge**
+
+```bash
+dsh plugin add https://github.com/xiaozhaoz1/dsh-mc-bridge
+```
+
+> 默认 `enabled=false` + `readOnly=true`（装上零副作用、默认不连、不给动作）。
