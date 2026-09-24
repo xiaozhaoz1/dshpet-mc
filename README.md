@@ -4,7 +4,7 @@
 
 - **形象可替换** —— 装进去的可以是**大肥鱼**（默认调试素材），也可以是**任意其他动画包**（第三方 manifest / 本地目录，接口已备好）
 - **接入方可替换** —— 通过**插件**接入任意 harness（**dsh 是首个接入方**，其他 harness 同样能接）
-- **2D / 3D 都能当桌宠** —— 2D 像素动画（默认），也预留了 **3D 后端**：可把 **[TLM（车万女仆）](https://github.com/TouhouLittleMaid) 女仆的 3D 模型**渲染成桌宠
+- **2D / 3D 都能当桌宠** —— 2D 像素动画（默认），也预留了 **3D 后端**：可把 **[TLM（车万女仆）](https://github.com/TartaricAcid/TouhouLittleMaid) 女仆的 3D 模型**渲染成桌宠
 
 > 一句话：**MC 里的桌宠底座** —— 形象、驱动方、渲染后端三者解耦，各换各的。
 
@@ -48,7 +48,7 @@
 ### ② 形象可替换（动画包）
 
 - **一包 = 一只宠物模型**；`/dshpet model <id>` 或配置屏切换
-- **默认调试素材**：**大肥鱼**（来自开源项目 [dsh-pet](https://github.com/PC2005-cloud/dsh-pet)）
+- **默认调试宠物**：昵称「**大肥鱼**」——动画素材来自开源项目 [dsh-pet](https://github.com/PC2005-cloud/dsh-pet) 的 `assets/preview/`（**上游素材无此名，只是昵称**）
 - **任意第三方包**：支持自定义 manifest 链接下载、或手动放置目录（`config/dshpet/animations/` 优先级最高）
 - **包按需下载**：多镜像并行 + 断点续传 + md5 校验 + 校验后落盘
 
@@ -56,7 +56,7 @@
 
 - **2D（默认）**：像素动画贴图。**三档缩放模式**：`native`（1 texel = 1 物理像素）/ `pixel_perfect`（整数倍，默认 **2×**）/ `ratio`（按屏比例）
 - **清晰度方案**：CPU 预重采样（可分离两趟 + 预乘 alpha）+ 1:1 绘制，规避非整数倍缩放的发糊/抖动
-- **3D（预留接口）**：可把 **[TLM 车万女仆](https://github.com/TouhouLittleMaid) 的 3D 模型**作为桌宠渲染 —— 复用玩家已有的女仆模型/皮肤，无需另做素材
+- **3D（预留接口）**：可把 **[TLM 车万女仆](https://github.com/TartaricAcid/TouhouLittleMaid) 的 3D 模型**作为桌宠渲染 —— 复用玩家已有的女仆模型/皮肤，无需另做素材
 
 ---
 
@@ -67,7 +67,7 @@
 | 内容 | 许可 |
 |---|---|
 | **本项目代码** | **MIT**（见 [`LICENSE`](LICENSE)） |
-| **调试素材「大肥鱼」** | 来自开源项目 **[PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)**，遵循其条款：**允许开源使用、禁止商用** —— **不适用 MIT** |
+| **调试宠物的动画素材**（昵称「大肥鱼」） | 来自开源项目 **[PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)** 的 `assets/preview/`，遵循其条款：**允许开源使用、禁止商用** —— **不适用 MIT** |
 | 上游代码部分 | MIT（`Copyright (c) 2026 PC2005-cloud`），全文见 [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md) |
 
 **两点说明**：
@@ -125,5 +125,5 @@
 
 ## 致谢
 
-- 桌面宠物概念与**调试素材「大肥鱼」**来自 **[PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)**（MIT 代码 / 素材允许开源使用、禁止商用）
+- 默认调试宠物（昵称「大肥鱼」）的动画素材来自 **[PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)**（MIT 代码 / 素材允许开源使用、禁止商用）
 - 接入架构调研参考 [Easy LLM](https://modrinth.com/mod/easy-llm)、[BeaCraft](https://modrinth.com/mod/projectbea)、[elly-ai-agent](https://github.com/Smekkamite/elly-ai-agent)、[ai-companion-core](https://github.com/chappadodle/ai-companion-core)、[Voyager](https://github.com/MineDojo/Voyager)、[MineAgent](https://github.com/bingdongni/MineAgent)
