@@ -12,7 +12,7 @@
   "dshpet.assets.not_installed": "[dshpet] 素材包 %s 未安装",
   "dshpet.assets.enabled": "[dshpet] 已启用素材包 %s（重进世界后生效）",
   "dshpet.assets.removed": "[dshpet] 已删除素材包 %s",
-  "dshpet.assets.list.header": "[dshpet] 素材包：已安装 %s / 可用 %s（当前启用：%s）",
+  "dshpet.assets.list.header": "[dshpet] 素材包：已安装 %s（当前启用：%s）",
   "dshpet.assets.list.entry": "  · %s v%s —— %s（%s）",
   "dshpet.assets.help": "[dshpet] 素材命令：assets default（下载默认包）· assets list · assets install <id> · assets remove <id> · model <id>（换模型）· about",
   "dshpet.assets.unknown_pack": "[dshpet] 清单里没有素材包 %s",

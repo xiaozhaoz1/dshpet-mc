@@ -100,6 +100,12 @@ public final class PetHud {
     private static long lastNanos;
     private static double tickAccumulator;
     private static boolean initFailed;
+
+    /** 连续加载失败计数（用于延迟判定，避免配置未就绪时误报）。 */
+    private static int loadFailStreak;
+
+    /** 连续失败达到该次数才认为"确实没有素材"（约 1 秒 @60fps）。 */
+    private static final int LOAD_FAIL_STREAK_BEFORE_WARN = 60;
     /** 是否已发过"无素材"聊天提示（一次性，避免刷屏）。 */
     private static boolean hinted;
 
@@ -244,8 +250,19 @@ public final class PetHud {
         if (initFailed) {
             return false;
         }
-        AnimationClip loaded = SpriteBackend.load(currentAnimName(), userAnimDir);
+        AnimationClip loaded;
+        try {
+            loaded = SpriteBackend.load(currentAnimName(), userAnimDir);
+        } catch (IllegalStateException notReadyYet) {
+            // 配置/路径尚未注入（首帧早于平台入口注入）⇒ **静默重试**：
+            // 不置 initFailed、不 WARN、不提示（BUG-002：曾因此在进入世界时误报"没有素材"）
+            return false;
+        }
         if (loaded == null) {
+            // 延迟判定：连续失败若干次后才认定"确实没有素材"，避免"早于初始化"的假失败
+            if (++loadFailStreak < LOAD_FAIL_STREAK_BEFORE_WARN) {
+                return false;
+            }
             initFailed = true;
             DshPetLog.warn(DshPetLog.ASSET,
                     "找不到可用动画 '{}' ⇒ 本会话不显示宠物。安装素材：/dshpet assets default"
@@ -254,6 +271,7 @@ public final class PetHud {
             return false;
         }
         clip = loaded;
+        loadFailStreak = 0;
         animator = new Animator(clip.frameCount(), Animator.ticksPerFrameFor(clip.fps()), true);
         scale = computeScale(clip);
         lastNanos = System.nanoTime();

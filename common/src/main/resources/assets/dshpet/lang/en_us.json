@@ -12,7 +12,7 @@
   "dshpet.assets.not_installed": "[dshpet] Asset pack %s is not installed",
   "dshpet.assets.enabled": "[dshpet] Enabled asset pack %s (takes effect after re-entering the world)",
   "dshpet.assets.removed": "[dshpet] Removed asset pack %s",
-  "dshpet.assets.list.header": "[dshpet] Asset packs: installed %s / available %s (active: %s)",
+  "dshpet.assets.list.header": "[dshpet] Asset packs: %s installed (active: %s)",
   "dshpet.assets.list.entry": "  · %s v%s — %s (%s)",
   "dshpet.assets.help": "[dshpet] Asset commands: assets default · assets list · assets install <id> · assets remove <id> · model <id> · about",
   "dshpet.assets.unknown_pack": "[dshpet] Manifest has no asset pack %s",
