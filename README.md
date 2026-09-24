@@ -3,7 +3,9 @@
 把 [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) 的桌面宠物体验移植成 **Minecraft 纯客户端 HUD 桌宠 mod**。
 
 - **平台**：Forge 1.20.1 / NeoForge 1.21.1（Stonecutter 双节点）
-- **定位**：纯客户端（`displayTest = IGNORE_SERVER_VERSION`），服务端无需安装，**无网络请求**
+- **定位**：纯客户端（`displayTest = IGNORE_SERVER_VERSION`），服务端无需安装
+- **素材获取**：**装上即用；首次需下载素材（约 64MB，一次性）**；也可**离线自备**——把 `.gif`/`.png` 放进 `config/dshpet/animations/`，或手动放置整包目录
+  - 除「按需下载素材」外**无任何网络请求**；不发送遥测、不联外网
 - **状态**：`0.1.0`（M1：单宠物 + 待机动画 + HUD 常驻显示）
 
 ---
@@ -15,7 +17,7 @@
 | 内容 | 许可 | 说明 |
 |---|---|---|
 | **本项目代码** | **MIT**（见 [`LICENSE`](LICENSE)） | 可自由使用/修改/分发 |
-| **内嵌动画素材**（`assets/dshpet/animations/*.gif`） | 上游条款：**允许开源使用，禁止商用** | **不适用 MIT**！ |
+| **动画素材**（运行时按需下载，**本仓库不分发**） | 上游条款：**允许开源使用，禁止商用** | **不适用 MIT**！ |
 | 上游代码部分 | MIT（`Copyright (c) 2026 PC2005-cloud`） | 全文见 [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md) |
 
 ### 上游署名要求（二创约定，原文摘录）
